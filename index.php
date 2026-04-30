@@ -2,10 +2,10 @@
 $insert = false;
 // Only run this if the 'name' field is sent from the form
 if(isset($_POST['name'])){
-    $host = "localhost";
-    $user = "postgres";
-    $password = "Becool@123"; // Your password looks good!
-    $db = "travel_db";
+    $host = "";
+    $user = "";
+    $password = "";
+    $db = "";
 
     try {
         // 1. Establish the connection
