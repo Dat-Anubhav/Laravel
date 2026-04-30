@@ -1,19 +1,11 @@
 <?php
-
-// 1. Load the composer libraries
-require_once __DIR__ . '/vendor/autoload.php';
-
-// 2. Initialize the .env loader
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-$dotenv->load();
-
 $insert = false;
 // Only run this if the 'name' field is sent from the form
-if(isset($_POST['name'], $_POST['email'], $_POST['phone'])){
-    $host = getenv('DB_HOST');
-    $user = getenv('DB_USER');
-    $password = getenv('DB_PASS');
-    $db = getenv('DB_NAME');
+if(isset($_POST['name'])){
+    $host = "localhost";
+    $user = "postgres";
+    $password = "Becool@123"; // Your password looks good!
+    $db = "travel_db";
 
     try {
         // 1. Establish the connection
