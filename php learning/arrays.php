@@ -17,7 +17,7 @@ echo '<pre>': This "opening" tag tells the browser: "Stop squashing spaces! Disp
 echo '</pre>': This "closing" tag tells the browser: "Okay, go back to normal HTML formatting now".*/
 
 
-//Associative array//
+//Associative array like dictionaries in python//
 
 $a_arr =
 [
