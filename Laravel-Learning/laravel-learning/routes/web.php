@@ -39,5 +39,9 @@ Route::get('/view',[UserController::class,'getUserView']);
 
 Route::get('/nestedview',[UserController::class,'getNested']);
 
+//How to know view exists or not?
+
+Route::get('/checkview',[UserController::class,'checkview']);
+
 
 
