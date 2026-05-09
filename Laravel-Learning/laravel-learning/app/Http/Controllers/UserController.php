@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
+use Illuminate\Validation\Rules\Exists;
 
 class UserController extends Controller
 {
@@ -25,5 +27,13 @@ class UserController extends Controller
     function getNested(){
         return view('admin.login');
     }
-}
+    function checkview(){
+        if(View::exists('admin.signin')){
+            return view('admin.signin');
+        }
+        else{
+            echo "no view found";
+        }
 
+}
+}
