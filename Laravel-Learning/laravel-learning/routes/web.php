@@ -43,5 +43,9 @@ Route::get('/nestedview',[UserController::class,'getNested']);
 
 Route::get('/checkview',[UserController::class,'checkview']);
 
+//call blade template view with controller
+
+Route::get('/home2',[UserController::class,'home']);
+
 
 
