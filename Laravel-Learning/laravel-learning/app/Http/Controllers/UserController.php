@@ -36,4 +36,8 @@ class UserController extends Controller
         }
 
 }
+    function home(){
+        $name="rishu";
+        return view('home',["name"=>$name]);
+    }
 }
