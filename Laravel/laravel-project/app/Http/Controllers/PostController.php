@@ -14,7 +14,8 @@ class PostController extends Controller
     public function index()
     {
         $categories=Category::get();
-        return view("dashboard",compact("categories"));//compact() is a method to pass a data or variable
+        $posts=Post::orderBy('created_at', 'DESC')->get();
+        return view("dashboard",compact("categories","posts"));//compact() is a method to pass a data or variable
     }
 
     /**
