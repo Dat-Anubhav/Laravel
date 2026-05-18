@@ -1,76 +1,32 @@
 <x-app-layout>
-    <div class="py-4">
+    <div class="py-6 bg-gray-100 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-4 text-gray-900">
-                    <ul class="flex justify-center flex-wrap text-sm font-medium text-center text-body">
-                        <li class="me-2">
-                            <a href="#" class="inline-block px-4 py-2 text-white bg-blue-600 rounded-md active" aria-current="page">
-                                All
-                            </a>
-                        </li>
-
-                        @foreach ($categories as $cat)
-                            <li class="me-2">
-                                <a href="#"
-                                   class="inline-block px-4 py-2 rounded-base hover:text-heading hover:bg-neutral-secondary-soft">
-                                    {{ $cat->name }}
-                                </a>
-                            </li>
-                        @endforeach
-                    </ul>
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-4">
+                    <x-category-tabs />
                 </div>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6">
-                <div class="p-4 text-gray-900">
-                    @foreach ($posts as $po)
-                        <div class="bg-neutral-primary-soft p-6 border border-default rounded-base shadow-xs mt-8 text-gray-900">
-                            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-
-                                <div class="flex-1">
-                                    <a href="#">
-                                        <h5 class="mb-2 text-2xl font-semibold tracking-tight text-heading">
-                                            Streamlining your design process today.
-                                        </h5>
-                                    </a>
-
-                                    <p class="mb-6 text-body">
-                                        In today’s fast-paced digital landscape, fostering seamless collaboration among Developers and IT Operations.
-                                    </p>
-
-                                    <a href="#"
-                                       class="inline-flex items-center text-white bg-blue-600 box-border border border-default-medium hover:bg-blue-700 focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2 focus:outline-none">
-                                        Read more
-                                        <svg class="w-4 h-4 ms-1.5 rtl:rotate-180 -me-0.5"
-                                             aria-hidden="true"
-                                             xmlns="http://www.w3.org/2000/svg"
-                                             width="24"
-                                             height="24"
-                                             fill="none"
-                                             viewBox="0 0 24 24">
-                                            <path stroke="currentColor"
-                                                  stroke-linecap="round"
-                                                  stroke-linejoin="round"
-                                                  stroke-width="2"
-                                                  d="M19 12H5m14 0-4 4m4-4-4-4" />
-                                        </svg>
-                                    </a>
-                                </div>
-
-                                <div class="w-full md:w-[420px]">
-                                    <a href="#">
-                                        <img class="rounded-base w-full h-auto"
-                                             src="https://flowbite.com/docs/images/blog/image-1.jpg"
-                                             alt="Post image" />
-                                    </a>
-                                </div>
-
-                            </div>
+            <div class="space-y-6">
+                @forelse ($posts as $p)
+                <x-post-item :po="$p"/> <!--post-item.blade.php define $po variable inside it -->
+                    
+                @empty
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-12 text-center">
+                        <div class="max-w-md mx-auto flex flex-col items-center">
+                            <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"></path>
+                            </svg>
+                            <h3 class="text-lg font-bold text-gray-900 mb-1">No articles found</h3>
+                            <p class="text-sm text-gray-500">We couldn't find any posts matching your selection right now. Try checking back later or browsing another category.</p>
                         </div>
-                    @endforeach
-                </div>
+                    </div>
+                @endforelse
+            </div>
+
+            <div class="mt-6">
+                {{ $posts->onEachSide(1)->links() }}
             </div>
 
         </div>
