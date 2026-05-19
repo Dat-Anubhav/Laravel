@@ -17,7 +17,7 @@ class PostController extends Controller
         $posts=Post::orderBy('created_at', 'DESC')->simplePaginate(5);
         //dd($posts);/*In Laravel, the dd() function stands for Dump and Die.It is a helper function used mainly for debugging*/
 
-        return view("dashboard",compact("posts"));//compact() is a method to pass a data or variable
+        return view("post.index",compact("posts"));//compact() is a method to pass a data or variable
     }
 
     /**
@@ -25,7 +25,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        //
+        return view('post.create');
     }
 
     /**
@@ -33,7 +33,7 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        dd($request->all());
     }
 
     /**
