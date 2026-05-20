@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Symfony\Contracts\Service\Attribute\Required;
 
 class PostController extends Controller
 {
@@ -25,7 +26,8 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view('post.create');
+        $categories=Category::get();
+        return view('post.create', compact('categories'));
     }
 
     /**
@@ -33,7 +35,11 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        $request->validate([
+            'image'=>['required', 'image','mimes:jpeg,jpg,png,,gif,svg','max:2048'],
+            'title'=>'required',
+            'content'=>'required',
+            'category_id'=>'required']);
     }
 
     /**
