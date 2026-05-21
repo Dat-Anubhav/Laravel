@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Str;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class PostController extends Controller
@@ -35,11 +36,23 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'image'=>['required', 'image','mimes:jpeg,jpg,png,,gif,svg','max:2048'],
+        $data=$request->validate([
+            'image'=>['required', 'image','mimes:jpeg,jpg,png,gif,svg','max:2048'],
             'title'=>'required',
             'content'=>'required',
-            'category_id'=>'required']);
+            'category_id'=>['required', 'exists:categories,id'],
+            'published_at'=>['nullable','datetime']]);
+
+            $image=$data['image'];// 1. Temporarily save the uploaded file object into $image
+            unset($data['image']);// 2. Remove the file object from the $data array (you can't save a raw file object textually in SQL)
+            $data['user_id'] = auth()->id();// 3. Grab the ID of the currently logged-in user and attach it
+            $data['slug'] = Str::slug($data['title']);// 4. Convert the title into a URL-friendly slug (e.g., "Test Title" becomes "test-title")
+
+            $imagepath=$image->store('posts','public');
+            $data['image'] = $imagepath;
+
+        Post::create($data);//saving the data into the database
+        return redirect()->route('dashboard'); //redirecting to homepage thi dashboard is the route name not path path is = '/' remeber ?
     }
 
     /**

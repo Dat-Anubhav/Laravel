@@ -36,6 +36,6 @@ class DatabaseSeeder extends Seeder
             Category::create(['name'=> $category]); //creates a database record for every category name in the list.
         }
 
-        Post::factory(100)->create();//creating 100 posts
+       // Post::factory(100)->create();//creating 100 posts
     }
 }
