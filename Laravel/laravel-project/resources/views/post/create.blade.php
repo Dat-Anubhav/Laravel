@@ -24,7 +24,7 @@
                             class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block mt-1 w-full">
                             <option value="">Select a Category</option>
                             @foreach ($categories as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                <option value="{{ $cat->id }}" @selected(old('category_id') == $cat->id)>{{ $cat->name }}</option>
                             @endforeach
                         </select>
                         <x-input-error :messages="$errors->get('category_id')" class="mt-2" />
@@ -35,7 +35,7 @@
                     <div class="mt-4">
                         <x-input-label for="title" :value="__('Title')" />
                         <x-text-input id="title" class="block mt-1 w-full" type="text" name="title"
-                            :value="old('title')" required autofocus />
+                            :value="old('title')" autofocus />
                         <x-input-error :messages="$errors->get('title')" class="mt-2" />
                     </div>
 
@@ -43,8 +43,9 @@
 
                     <div class="mt-4">
                         <x-input-label for="content" :value="__('Content')" />
-                        <x-input-textarea id="content" class="block mt-1 w-full" type="text" name="content"
-                            :value="old('content')" required />
+                        <x-input-textarea id="content" class="block mt-1 w-full" type="text" name="content">
+                            {{ old('content') }}
+                            </x-input-textarea>
                         <x-input-error :messages="$errors->get('content')" class="mt-2" />
                     </div>
 

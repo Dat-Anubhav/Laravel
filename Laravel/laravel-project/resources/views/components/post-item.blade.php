@@ -25,7 +25,7 @@
         <div class="w-full md:w-[320px] lg:w-[400px] order-1 md:order-2 shrink-0">
             <a href="#">
                 <img class="rounded-lg w-full h-48 md:h-56 object-cover shadow-sm hover:opacity-95 transition-opacity"
-                     src="https://flowbite.com/docs/images/blog/image-1.jpg"
+                     src="{{ Storage::url($po->image) }}"
                      alt="{{ $po->title }}" />
             </a>
         </div>
