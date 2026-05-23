@@ -26,6 +26,18 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            
+            // 1. Authorize and validate the custom username input
+            'username' => [
+                'required',
+                'string',
+                'alpha_dash', // Forces clean URLs (letters, numbers, dashes, underscores)
+                'max:255',
+                Rule::unique(User::class)->ignore($this->user()->id), // The "ignore me" condition
+            ],
+            
+            // 2. Authorize and validate the optional bio input
+            'bio' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }
