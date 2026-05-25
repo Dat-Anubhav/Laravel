@@ -17,6 +17,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/post/create', [PostController::class, 'store'])
         ->name('post.store');
+
+    Route::get('/post/{post:slug}', [PostController::class, 'show'])
+        ->name('post.show');
+
+    
 });
 
 Route::middleware('auth')->group(function () {
@@ -24,5 +29,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Public Author Profile Route
+Route::get('/@{username}', [ProfileController::class, 'show'])
+    ->name('profile.public');// if u keep this outside the middleware then anyone can see the authors's post
 
 require __DIR__.'/auth.php';
