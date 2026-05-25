@@ -41,7 +41,7 @@ class PostController extends Controller
             'title'=>'required',
             'content'=>'required',
             'category_id'=>['required', 'exists:categories,id'],
-            'published_at'=>['nullable','datetime']]);
+            'published_at'=>['nullable','date']]);
 
             $image=$data['image'];// 1. Temporarily save the uploaded file object into $image
             unset($data['image']);// 2. Remove the file object from the $data array (you can't save a raw file object textually in SQL)
@@ -60,7 +60,8 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        // This passes the active post directly into a new view template
+    return view('post.show', compact('post'));
     }
 
     /**

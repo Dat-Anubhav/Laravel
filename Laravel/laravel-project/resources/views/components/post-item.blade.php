@@ -2,7 +2,7 @@
     <div class="flex flex-col md:flex-row justify-between items-start gap-6">
 
         <div class="flex-1 order-2 md:order-1">
-            <a href="#" class="group">
+            <a href="{{ route('post.show', $po->slug) }}" class="group">
                 <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
                     {{ $po->title }}
                 </h5>
@@ -12,7 +12,7 @@
                 {{ Str::limit($po->content, 190) }}
             </p>
             
-            <a href="#">
+            <a href="{{ route('post.show', $po->slug) }}">
                 <x-primary-button>
                     Read more
                     <svg class="w-4 h-4 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
