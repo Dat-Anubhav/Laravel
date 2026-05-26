@@ -21,6 +21,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/post/{post:slug}', [PostController::class, 'show'])
         ->name('post.show');
 
+    Route::get('/post/{post:slug}/edit', [PostController::class, 'edit'])
+        ->name('post.edit');
+
+    Route::patch('/post/{post:slug}', [PostController::class, 'update'])
+        ->name('post.update');
+
+    Route::delete('/post/{post:slug}', [PostController::class, 'destroy'])
+        ->name('post.destroy');
+
     
 });
 
