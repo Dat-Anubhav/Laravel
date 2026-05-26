@@ -57,4 +57,19 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    /**
+     * Display the public author profile page.
+     */
+    public function show(string $username): \Illuminate\View\View
+    {
+        // 1. Find the user in the database using their unique username
+        $user = \App\Models\User::where('username', $username)->firstOrFail();
+
+        // 2. Grab all posts belonging to this user using our Eloquent relationship
+        $posts = $user->posts()->orderBy('created_at', 'desc')->get();
+
+        // 3. Pass both the user and their posts into our new layout file
+        return view('profile.show', compact('user', 'posts'));
+    }
 }

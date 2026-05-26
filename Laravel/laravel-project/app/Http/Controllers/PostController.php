@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate; // ➕ IMPORT THIS FACADE
 use Str;
-use Symfony\Contracts\Service\Attribute\Required;
 
 class PostController extends Controller
 {
@@ -15,11 +15,8 @@ class PostController extends Controller
      */
     public function index()
     {
-        
-        $posts=Post::orderBy('created_at', 'DESC')->simplePaginate(5);
-        //dd($posts);/*In Laravel, the dd() function stands for Dump and Die.It is a helper function used mainly for debugging*/
-
-        return view("post.index",compact("posts"));//compact() is a method to pass a data or variable
+        $posts = Post::orderBy('created_at', 'DESC')->simplePaginate(5);
+        return view("post.index", compact("posts"));
     }
 
     /**
@@ -27,7 +24,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        $categories=Category::get();
+        $categories = Category::get();
         return view('post.create', compact('categories'));
     }
 
@@ -36,23 +33,24 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        $data=$request->validate([
-            'image'=>['required', 'image','mimes:jpeg,jpg,png,gif,svg','max:2048'],
-            'title'=>'required',
-            'content'=>'required',
-            'category_id'=>['required', 'exists:categories,id'],
-            'published_at'=>['nullable','date']]);
+        $data = $request->validate([
+            'image' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,svg', 'max:2048'],
+            'title' => 'required',
+            'content' => 'required',
+            'category_id' => ['required', 'exists:categories,id'],
+            'published_at' => ['nullable', 'date']
+        ]);
 
-            $image=$data['image'];// 1. Temporarily save the uploaded file object into $image
-            unset($data['image']);// 2. Remove the file object from the $data array (you can't save a raw file object textually in SQL)
-            $data['user_id'] = auth()->id();// 3. Grab the ID of the currently logged-in user and attach it
-            $data['slug'] = Str::slug($data['title']);// 4. Convert the title into a URL-friendly slug (e.g., "Test Title" becomes "test-title")
+        $image = $data['image'];
+        unset($data['image']);
+        $data['user_id'] = auth()->id();
+        $data['slug'] = Str::slug($data['title']);
 
-            $imagepath=$image->store('posts','public');
-            $data['image'] = $imagepath;
+        $imagepath = $image->store('posts', 'public');
+        $data['image'] = $imagepath;
 
-        Post::create($data);//saving the data into the database
-        return redirect()->route('dashboard'); //redirecting to homepage thi dashboard is the route name not path path is = '/' remeber ?
+        Post::create($data);
+        return redirect()->route('dashboard'); 
     }
 
     /**
@@ -60,8 +58,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        // This passes the active post directly into a new view template
-    return view('post.show', compact('post'));
+        return view('post.show', compact('post'));
     }
 
     /**
@@ -69,7 +66,11 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        //
+        // Bulletproof Policy Gate
+        Gate::authorize('update', $post);
+
+        $categories = Category::get();
+        return view('post.edit', compact('post', 'categories'));
     }
 
     /**
@@ -77,7 +78,28 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        //
+        // Bulletproof Policy Gate
+        Gate::authorize('update', $post);
+
+        $data = $request->validate([
+            'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,svg', 'max:2048'],
+            'title' => 'required',
+            'content' => 'required',
+            'category_id' => ['required', 'exists:categories,id'],
+            'published_at' => ['nullable', 'date']
+        ]);
+
+        if ($request->hasFile('image')) {
+            $imagepath = $request->file('image')->store('posts', 'public');
+            $data['image'] = $imagepath;
+        }
+
+        $data['slug'] = Str::slug($data['title']);
+
+        $post->update($data);
+
+        return redirect()->route('post.show', $post->slug)
+                         ->with('status', 'Article updated successfully!');
     }
 
     /**
@@ -85,6 +107,12 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        // Bulletproof Policy Gate
+        Gate::authorize('delete', $post);
+
+        $post->delete();
+
+        return redirect()->route('dashboard')
+                         ->with('status', 'Article deleted successfully!');
     }
 }
