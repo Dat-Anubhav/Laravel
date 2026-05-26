@@ -15,7 +15,9 @@ class PostController extends Controller
      */
     public function index()
     {
+        // Fetch posts ordered by creation date, 5 per page
         $posts = Post::orderBy('created_at', 'DESC')->simplePaginate(5);
+        // Return the view with the posts data
         return view("post.index", compact("posts"));
     }
 
@@ -24,6 +26,7 @@ class PostController extends Controller
      */
     public function create()
     {
+        // Fetch all categories for the dropdown menu
         $categories = Category::get();
         return view('post.create', compact('categories'));
     }
@@ -33,6 +36,7 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate incoming request data
         $data = $request->validate([
             'image' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,svg', 'max:2048'],
             'title' => 'required',
@@ -41,14 +45,19 @@ class PostController extends Controller
             'published_at' => ['nullable', 'date']
         ]);
 
+        // Separate image from other data to process it
         $image = $data['image'];
         unset($data['image']);
+        // Assign the currently authenticated user's ID
         $data['user_id'] = auth()->id();
+        // Generate a URL-friendly slug from the title
         $data['slug'] = Str::slug($data['title']);
 
+        // Store the uploaded image in the 'public/posts' directory
         $imagepath = $image->store('posts', 'public');
         $data['image'] = $imagepath;
 
+        // Create the post in the database
         Post::create($data);
         return redirect()->route('dashboard'); 
     }
@@ -66,9 +75,10 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        // Bulletproof Policy Gate
+        // Bulletproof Policy Gate: Ensure user is authorized to update this post
         Gate::authorize('update', $post);
 
+        // Fetch categories for the dropdown menu
         $categories = Category::get();
         return view('post.edit', compact('post', 'categories'));
     }
@@ -78,9 +88,10 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        // Bulletproof Policy Gate
+        // Bulletproof Policy Gate: Ensure user is authorized to update this post
         Gate::authorize('update', $post);
 
+        // Validate incoming request data
         $data = $request->validate([
             'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,svg', 'max:2048'],
             'title' => 'required',
@@ -89,13 +100,16 @@ class PostController extends Controller
             'published_at' => ['nullable', 'date']
         ]);
 
+        // If a new image is uploaded, store it and update the path
         if ($request->hasFile('image')) {
             $imagepath = $request->file('image')->store('posts', 'public');
             $data['image'] = $imagepath;
         }
 
+        // Regenerate slug in case the title changed
         $data['slug'] = Str::slug($data['title']);
 
+        // Update the post in the database
         $post->update($data);
 
         return redirect()->route('post.show', $post->slug)
@@ -107,9 +121,10 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        // Bulletproof Policy Gate
+        // Bulletproof Policy Gate: Ensure user is authorized to delete this post
         Gate::authorize('delete', $post);
 
+        // Delete the post from the database
         $post->delete();
 
         return redirect()->route('dashboard')
