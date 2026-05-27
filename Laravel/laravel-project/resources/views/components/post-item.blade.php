@@ -11,7 +11,11 @@
             </a>
 
             <p class="text-xs text-gray-500 mb-2">
-                By <span class="font-semibold text-gray-700">{{ $po->user->name }}</span>
+                By
+                <a href="{{ route('profile.public', $po->user->username) }}"
+                    class="font-semibold text-gray-700 hover:text-blue-600 hover:underline transition-colors">
+                    {{ $po->user->name }}
+                </a>
             </p>
 
             <p class="mb-6 text-gray-600 leading-relaxed">

@@ -67,7 +67,7 @@ class ProfileController extends Controller
         $user = \App\Models\User::where('username', $username)->firstOrFail();
 
         // 2. Grab all posts belonging to this user using our Eloquent relationship
-        $posts = $user->posts()->orderBy('created_at', 'desc')->get();
+        $posts = $user->posts()->orderBy('created_at', 'desc')->simplePaginate(5);
 
         // 3. Pass both the user and their posts into our new layout file
         return view('profile.show', compact('user', 'posts'));
