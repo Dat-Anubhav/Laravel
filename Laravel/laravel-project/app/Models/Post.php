@@ -27,5 +27,18 @@ class Post extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function likedByUsers()
+{
+    return $this->belongsToMany(User::class)->withTimestamps();
+}
+
+/**
+     * Get the category that owns the post.
+     */
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
 }
 

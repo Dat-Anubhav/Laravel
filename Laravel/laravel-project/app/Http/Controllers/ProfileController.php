@@ -59,17 +59,30 @@ class ProfileController extends Controller
     }
 
     /**
-     * Display the public author profile page.
+     * Display the public author profile page with optional category filtering.
      */
-    public function show(string $username): \Illuminate\View\View
+    public function show(Request $request, string $username): \Illuminate\View\View
     {
         // 1. Find the user in the database using their unique username
         $user = \App\Models\User::where('username', $username)->firstOrFail();
 
-        // 2. Grab all posts belonging to this user using our Eloquent relationship
-        $posts = $user->posts()->orderBy('created_at', 'desc')->simplePaginate(5);
+        // 2. Start building the query for this user's posts relationship
+        $postsQuery = $user->posts()->orderBy('created_at', 'desc');
 
-        // 3. Pass both the user and their posts into our new layout file
+        // 3. Check if a specific category parameter exists in the incoming URL query string
+        if ($request->has('category')) {
+            $categorySlug = $request->query('category');
+            
+            // Refine the posts lookup to match the given category slug relation
+            $postsQuery->whereHas('category', function ($query) use ($categorySlug) {
+                $query->where('slug', $categorySlug);
+            });
+        }
+
+        // 4. Finalize the query with simple pagination (5 records per page)
+        $posts = $postsQuery->simplePaginate(5);
+
+        // 5. Pass both the user and their dynamically filtered posts into our layout file
         return view('profile.show', compact('user', 'posts'));
     }
 }

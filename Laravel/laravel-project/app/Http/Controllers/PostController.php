@@ -11,13 +11,27 @@ use Str;
 class PostController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource with optional category filtering.
      */
-    public function index()
+    public function index(Request $request) // 🔄 Injected Request payload here
     {
-        // Fetch posts ordered by creation date, 5 per page
-        $posts = Post::orderBy('created_at', 'DESC')->simplePaginate(5);
-        // Return the view with the posts data
+        // 1. Start building the query for all posts, eager loading relationships
+        $postsQuery = Post::with(['user', 'category'])->orderBy('created_at', 'DESC');
+
+        // 2. 🎯 Check if a category parameter is active in the URL query string
+        if ($request->has('category')) {
+            $categorySlug = $request->query('category');
+            
+            // Refine lookups to match the category slug
+            $postsQuery->whereHas('category', function ($query) use ($categorySlug) {
+                $query->where('slug', $categorySlug);
+            });
+        }
+
+        // 3. Finalize the query with simple pagination (5 items per page)
+        $posts = $postsQuery->simplePaginate(5);
+
+        // 4. Return the view with the dynamically filtered posts data
         return view("post.index", compact("posts"));
     }
 

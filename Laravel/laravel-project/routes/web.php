@@ -3,6 +3,8 @@
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LikeController;   
+use App\Http\Controllers\FollowController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -29,6 +31,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::delete('/post/{post:slug}', [PostController::class, 'destroy'])
         ->name('post.destroy');
+    
+    // Like/Unlike Toggle Action
+    Route::post('/posts/{post}/like', [LikeController::class, 'toggle'])->name('posts.like');
+
+    // Follow/Unfollow Toggle Action
+    Route::post('/users/{user}/follow', [FollowController::class, 'toggle'])->name('users.follow');
 
     
 });
