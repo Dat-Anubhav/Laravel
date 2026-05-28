@@ -4,6 +4,11 @@
         <div class="flex flex-col md:flex-row gap-12 items-start">
             
             <div class="w-full md:w-2/3 space-y-10">
+                
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4 mb-6 border border-gray-100">
+                    <x-category-tabs :user="$user" />
+                </div>
+
                 <div class="border-b border-gray-200 pb-4 mb-6">
                     <h2 class="text-2xl font-bold text-gray-900">Articles</h2>
                 </div>
@@ -54,8 +59,8 @@
                     </p>
 
                     <div class="flex gap-4 text-xs md:text-sm font-medium text-gray-700 border-y border-gray-100 py-3 mb-4">
-                        <div><span class="text-gray-900 font-bold">0</span> Followers</div>
-                        <div><span class="text-gray-900 font-bold">0</span> Following</div>
+                        <div><span class="text-gray-900 font-bold">{{ $user->followers()->count() }}</span> Followers</div>
+                        <div><span class="text-gray-900 font-bold">{{ $user->followings()->count() }}</span> Following</div>
                     </div>
 
                     <div class="text-xs md:text-sm text-gray-600 leading-relaxed">
@@ -74,9 +79,20 @@
                         </a>
                     @endif
 
-                    <button class="w-full mt-3 bg-gray-900 hover:bg-gray-800 text-white text-xs md:text-sm font-semibold py-2 px-4 rounded-full transition-colors shadow-sm">
-                        Follow
-                    </button>
+                    @if(auth()->id() !== $user->id)
+                        <form action="{{ route('users.follow', $user->id) }}" method="POST">
+                            @csrf
+                            @if(auth()->user()->followings->contains($user->id))
+                                <button type="submit" class="w-full mt-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs md:text-sm font-semibold py-2 px-4 rounded-full transition-colors shadow-sm border border-gray-200">
+                                    Unfollow
+                                </button>
+                            @else
+                                <button type="submit" class="w-full mt-3 bg-gray-900 hover:bg-gray-800 text-white text-xs md:text-sm font-semibold py-2 px-4 rounded-full transition-colors shadow-sm">
+                                    Follow
+                                </button>
+                            @endif
+                        </form>
+                    @endif
 
                 </div>
             </div>

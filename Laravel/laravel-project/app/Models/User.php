@@ -37,4 +37,22 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Post::class);
     }
+
+    // Posts this user has liked
+public function likedPosts()
+{
+    return $this->belongsToMany(Post::class)->withTimestamps();
+}
+
+// Authors this user is following
+public function followings()
+{
+    return $this->belongsToMany(User::class, 'followers', 'follower_id', 'leader_id')->withTimestamps();
+}
+
+// Users that follow this author
+public function followers()
+{
+    return $this->belongsToMany(User::class, 'followers', 'leader_id', 'follower_id')->withTimestamps();
+}
 }
