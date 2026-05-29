@@ -59,6 +59,16 @@
             <x-input-error class="mt-2" :messages="$errors->get('bio')" />
         </div>
 
+        <div>
+            <x-input-label for="image" :value="__('Profile photo')" />
+            @if ($user->image)
+                <img src="{{ Storage::url($user->image) }}" alt="{{ $user->name }}" class="mt-2 w-16 h-16 rounded-full object-cover" />
+            @endif
+            <input id="image" name="image" type="file" accept="image/*"
+                   class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200" />
+            <x-input-error class="mt-2" :messages="$errors->get('image')" />
+        </div>
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

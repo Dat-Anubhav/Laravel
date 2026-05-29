@@ -1,17 +1,19 @@
 <?php
 
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\FollowController;
+use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\LikeController;   
-use App\Http\Controllers\FollowController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::view('/', 'welcome')->name('home');
+
+Route::get('/post/{post:slug}', [PostController::class, 'show'])
+    ->name('post.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/', [PostController::class, 'index'])
+    Route::get('/dashboard', [PostController::class, 'index'])
         ->name('dashboard');
 
     Route::get('/post/create', [PostController::class, 'create'])
@@ -19,9 +21,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/post/create', [PostController::class, 'store'])
         ->name('post.store');
-
-    Route::get('/post/{post:slug}', [PostController::class, 'show'])
-        ->name('post.show');
 
     Route::get('/post/{post:slug}/edit', [PostController::class, 'edit'])
         ->name('post.edit');
@@ -31,14 +30,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::delete('/post/{post:slug}', [PostController::class, 'destroy'])
         ->name('post.destroy');
-    
-    // Like/Unlike Toggle Action
-    Route::post('/posts/{post}/like', [LikeController::class, 'toggle'])->name('posts.like');
 
-    // Follow/Unfollow Toggle Action
-    Route::post('/users/{user}/follow', [FollowController::class, 'toggle'])->name('users.follow');
+    Route::post('/posts/{post}/like', [LikeController::class, 'toggle'])
+        ->name('posts.like');
 
-    
+    Route::post('/users/{user}/follow', [FollowController::class, 'toggle'])
+        ->name('users.follow');
+
+    Route::post('/posts/{post}/comments', [CommentController::class, 'store'])
+        ->name('comments.store');
 });
 
 Route::middleware('auth')->group(function () {
@@ -47,8 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Public Author Profile Route
 Route::get('/@{username}', [ProfileController::class, 'show'])
-    ->name('profile.public');// if u keep this outside the middleware then anyone can see the authors's post
+    ->name('profile.public');
 
 require __DIR__.'/auth.php';

@@ -3,17 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
     public function edit(Request $request): View
     {
         return view('profile.edit', [
@@ -21,25 +24,28 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Update the user's profile information.
-     */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->safe()->except('image'));
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($request->hasFile('image')) {
+            if ($user->image) {
+                Storage::disk('public')->delete($user->image);
+            }
+
+            $user->image = $this->storeAvatar($request->file('image'), $user->username);
         }
 
-        $request->user()->save();
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
-    /**
-     * Delete the user's account.
-     */
     public function destroy(Request $request): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [
@@ -58,31 +64,61 @@ class ProfileController extends Controller
         return Redirect::to('/');
     }
 
-    /**
-     * Display the public author profile page with optional category filtering.
-     */
-    public function show(Request $request, string $username): \Illuminate\View\View
+    public function show(Request $request, string $username): View
     {
-        // 1. Find the user in the database using their unique username
-        $user = \App\Models\User::where('username', $username)->firstOrFail();
+        $user = User::where('username', $username)
+            ->withCount(['followers', 'followings'])
+            ->firstOrFail();
 
-        // 2. Start building the query for this user's posts relationship
-        $postsQuery = $user->posts()->orderBy('created_at', 'desc');
+        $postsQuery = $user->posts()
+            ->with(['category', 'user'])
+            ->withCount(['likes', 'comments'])
+            ->orderByDesc('created_at');
 
-        // 3. Check if a specific category parameter exists in the incoming URL query string
         if ($request->has('category')) {
             $categorySlug = $request->query('category');
-            
-            // Refine the posts lookup to match the given category slug relation
+
             $postsQuery->whereHas('category', function ($query) use ($categorySlug) {
                 $query->where('slug', $categorySlug);
             });
         }
 
-        // 4. Finalize the query with simple pagination (5 records per page)
         $posts = $postsQuery->simplePaginate(5);
+        $likedPostIds = $this->likedPostIdsFor($posts);
 
-        // 5. Pass both the user and their dynamically filtered posts into our layout file
-        return view('profile.show', compact('user', 'posts'));
+        $isFollowing = auth()->check()
+            && auth()->id() !== $user->id
+            && auth()->user()->followings()->where('leader_id', $user->id)->exists();
+
+        return view('profile.show', compact('user', 'posts', 'likedPostIds', 'isFollowing'));
+    }
+
+    private function likedPostIdsFor($posts): Collection
+    {
+        if (! auth()->check() || $posts->isEmpty()) {
+            return collect();
+        }
+
+        return auth()->user()
+            ->likedPosts()
+            ->whereIn('posts.id', $posts->pluck('id'))
+            ->pluck('posts.id');
+    }
+
+    private function storeAvatar($imageFile, string $username): string
+    {
+        $filename = time().'_'.Str::slug($username).'.jpg';
+        $destinationPath = storage_path('app/public/avatars');
+
+        if (! file_exists($destinationPath)) {
+            mkdir($destinationPath, 0755, true);
+        }
+
+        $manager = new ImageManager(new Driver());
+        $image = $manager->read($imageFile);
+        $image->cover(200, 200);
+        $image->toJpeg(85)->save($destinationPath.'/'.$filename);
+
+        return 'avatars/'.$filename;
     }
 }

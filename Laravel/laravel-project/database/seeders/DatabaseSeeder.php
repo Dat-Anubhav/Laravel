@@ -2,30 +2,26 @@
 
 namespace Database\Seeders;
 
-
 use App\Models\Category;
-use App\Models\Post;
 use App\Models\User;
-
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-         User::factory()->create([
+        User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'username' => 'test_user'
+            'username' => 'test_user',
+            'email_verified_at' => now(),
         ]);
 
-        $categories=[
+        $categories = [
             'Technology',
             'Health',
             'Science',
@@ -33,10 +29,12 @@ class DatabaseSeeder extends Seeder
             'Politics',
             'Entertainment',
         ];
-        foreach ($categories as $category) {
-            Category::create(['name'=> $category]); //creates a database record for every category name in the list.
-        }
 
-       // Post::factory(100)->create();//creating 100 posts
+        foreach ($categories as $name) {
+            Category::create([
+                'name' => $name,
+                'slug' => Str::slug($name),
+            ]);
+        }
     }
 }

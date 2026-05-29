@@ -3,19 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\RedirectResponse;
 
 class FollowController extends Controller
 {
-    public function toggle(User $user): RedirectResponse
+    /**
+     * Toggle the follow status for a specified user using traditional redirect back.
+     */
+    public function toggle(User $user)
     {
-        // Prevent users from following themselves
-        if (auth()->id() === $user->id) {
-            return back()->with('error', 'You cannot follow yourself.');
+        // 1. Redirect guests straight to login
+        if (!auth()->check()) {
+            return redirect()->route('login');
         }
 
+        // 2. Prevent self-following anomalies
+        if (auth()->id() === $user->id) {
+            return back();
+        }
+
+        // 3. Perform the tracking toggle step against relations table
         auth()->user()->followings()->toggle($user->id);
 
+        // 4. Return page redirect back to the view state
         return back();
     }
 }
