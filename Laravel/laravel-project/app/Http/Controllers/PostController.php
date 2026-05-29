@@ -5,143 +5,170 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate; // ➕ IMPORT THIS FACADE
-use Str;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class PostController extends Controller
 {
-    /**
-     * Display a listing of the resource with optional category filtering.
-     */
-    public function index(Request $request) // 🔄 Injected Request payload here
+    public function index(Request $request)
     {
-        // 1. Start building the query for all posts, eager loading relationships
-        $postsQuery = Post::with(['user', 'category'])->orderBy('created_at', 'DESC');
+        $postsQuery = Post::with(['user', 'category'])
+            ->withCount(['likes', 'comments'])
+            ->orderByDesc('created_at');
 
-        // 2. 🎯 Check if a category parameter is active in the URL query string
+        if ($request->query('feed') === 'following') {
+            $followedUserIds = auth()->user()
+                ->followings()
+                ->pluck('leader_id')
+                ->toArray();
+
+            $postsQuery->whereIn('user_id', $followedUserIds);
+        }
+
         if ($request->has('category')) {
             $categorySlug = $request->query('category');
-            
-            // Refine lookups to match the category slug
+
             $postsQuery->whereHas('category', function ($query) use ($categorySlug) {
                 $query->where('slug', $categorySlug);
             });
         }
 
-        // 3. Finalize the query with simple pagination (5 items per page)
         $posts = $postsQuery->simplePaginate(5);
+        $likedPostIds = $this->likedPostIdsFor($posts);
 
-        // 4. Return the view with the dynamically filtered posts data
-        return view("post.index", compact("posts"));
+        return view('post.index', compact('posts', 'likedPostIds'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        // Fetch all categories for the dropdown menu
-        $categories = Category::get();
+        $categories = Category::orderBy('name')->get();
+
         return view('post.create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        // Validate incoming request data
         $data = $request->validate([
             'image' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,svg', 'max:2048'],
             'title' => 'required',
             'content' => 'required',
             'category_id' => ['required', 'exists:categories,id'],
-            'published_at' => ['nullable', 'date']
+            'published_at' => ['nullable', 'date'],
         ]);
 
-        // Separate image from other data to process it
-        $image = $data['image'];
-        unset($data['image']);
-        // Assign the currently authenticated user's ID
+        $data['image'] = $this->storeOptimizedImage($request->file('image'), $data['title']);
         $data['user_id'] = auth()->id();
-        // Generate a URL-friendly slug from the title
-        $data['slug'] = Str::slug($data['title']);
+        $data['slug'] = $this->uniqueSlug($data['title']);
 
-        // Store the uploaded image in the 'public/posts' directory
-        $imagepath = $image->store('posts', 'public');
-        $data['image'] = $imagepath;
-
-        // Create the post in the database
         Post::create($data);
-        return redirect()->route('dashboard'); 
+
+        return redirect()->route('dashboard');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Post $post)
     {
-        return view('post.show', compact('post'));
+        $post->load(['comments.user', 'user', 'category'])
+            ->loadCount(['likes', 'comments']);
+
+        $likedPostIds = auth()->check()
+            ? auth()->user()->likedPosts()->where('posts.id', $post->id)->pluck('posts.id')
+            : collect();
+
+        return view('post.show', compact('post', 'likedPostIds'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Post $post)
     {
-        // Bulletproof Policy Gate: Ensure user is authorized to update this post
         Gate::authorize('update', $post);
 
-        // Fetch categories for the dropdown menu
-        $categories = Category::get();
+        $categories = Category::orderBy('name')->get();
+
         return view('post.edit', compact('post', 'categories'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Post $post)
     {
-        // Bulletproof Policy Gate: Ensure user is authorized to update this post
         Gate::authorize('update', $post);
 
-        // Validate incoming request data
         $data = $request->validate([
             'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,svg', 'max:2048'],
             'title' => 'required',
             'content' => 'required',
             'category_id' => ['required', 'exists:categories,id'],
-            'published_at' => ['nullable', 'date']
+            'published_at' => ['nullable', 'date'],
         ]);
 
-        // If a new image is uploaded, store it and update the path
         if ($request->hasFile('image')) {
-            $imagepath = $request->file('image')->store('posts', 'public');
-            $data['image'] = $imagepath;
+            $data['image'] = $this->storeOptimizedImage($request->file('image'), $data['title']);
         }
 
-        // Regenerate slug in case the title changed
-        $data['slug'] = Str::slug($data['title']);
+        $data['slug'] = $this->uniqueSlug($data['title'], $post->id);
 
-        // Update the post in the database
         $post->update($data);
 
-        return redirect()->route('post.show', $post->slug)
-                         ->with('status', 'Article updated successfully!');
+        return redirect()
+            ->route('post.show', $post->slug)
+            ->with('status', 'Article updated successfully!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Post $post)
     {
-        // Bulletproof Policy Gate: Ensure user is authorized to delete this post
         Gate::authorize('delete', $post);
 
-        // Delete the post from the database
         $post->delete();
 
-        return redirect()->route('dashboard')
-                         ->with('status', 'Article deleted successfully!');
+        return redirect()
+            ->route('dashboard')
+            ->with('status', 'Article deleted successfully!');
+    }
+
+    private function likedPostIdsFor($posts): Collection
+    {
+        if (! auth()->check() || $posts->isEmpty()) {
+            return collect();
+        }
+
+        return auth()->user()
+            ->likedPosts()
+            ->whereIn('posts.id', $posts->pluck('id'))
+            ->pluck('posts.id');
+    }
+
+    private function storeOptimizedImage($imageFile, string $title): string
+    {
+        $filename = time().'_'.Str::slug($title).'.'.$imageFile->getClientOriginalExtension();
+        $destinationPath = storage_path('app/public/posts');
+
+        if (! file_exists($destinationPath)) {
+            mkdir($destinationPath, 0755, true);
+        }
+
+        $manager = new ImageManager(new Driver());
+        $image = $manager->read($imageFile);
+        $image->scale(width: 800);
+        $image->toJpeg(80)->save($destinationPath.'/'.$filename);
+
+        return 'posts/'.$filename;
+    }
+
+    private function uniqueSlug(string $title, ?int $ignorePostId = null): string
+    {
+        $slug = Str::slug($title);
+        $original = $slug;
+        $counter = 1;
+
+        while (
+            Post::where('slug', $slug)
+                ->when($ignorePostId, fn ($query) => $query->where('id', '!=', $ignorePostId))
+                ->exists()
+        ) {
+            $slug = $original.'-'.$counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 }
