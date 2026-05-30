@@ -3,28 +3,36 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class FollowController extends Controller
 {
-    /**
-     * Toggle the follow status for a specified user using traditional redirect back.
-     */
-    public function toggle(User $user)
+    public function toggle(Request $request, User $user): JsonResponse|RedirectResponse
     {
-        // 1. Redirect guests straight to login
-        if (!auth()->check()) {
-            return redirect()->route('login');
+        if (! auth()->check()) {
+            return $request->expectsJson()
+                ? response()->json(['message' => 'Unauthenticated.'], 401)
+                : redirect()->route('login');
         }
 
-        // 2. Prevent self-following anomalies
         if (auth()->id() === $user->id) {
-            return back();
+            return $request->expectsJson()
+                ? response()->json(['message' => 'Cannot follow yourself.'], 422)
+                : back();
         }
 
-        // 3. Perform the tracking toggle step against relations table
-        auth()->user()->followings()->toggle($user->id);
+        $result = auth()->user()->followings()->toggle($user->id);
+        $following = in_array($user->id, $result['attached'], true);
 
-        // 4. Return page redirect back to the view state
-        return back();
+        $payload = [
+            'following' => $following,
+            'followers_count' => $user->followers()->count(),
+        ];
+
+        return $request->expectsJson()
+            ? response()->json($payload)
+            : back();
     }
 }

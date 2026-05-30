@@ -7,12 +7,15 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
+use App\Services\ImageService;
 use Illuminate\Support\Str;
-use Intervention\Image\Drivers\Gd\Driver;
-use Intervention\Image\ImageManager;
 
 class PostController extends Controller
 {
+    public function __construct(
+        private ImageService $images
+    ) {}
+
     public function index(Request $request)
     {
         $postsQuery = Post::with(['user', 'category'])
@@ -146,10 +149,9 @@ class PostController extends Controller
             mkdir($destinationPath, 0755, true);
         }
 
-        $manager = new ImageManager(new Driver());
-        $image = $manager->read($imageFile);
-        $image->scale(width: 800);
-        $image->toJpeg(80)->save($destinationPath.'/'.$filename);
+        $absolutePath = $destinationPath.'/'.$filename;
+
+        $this->images->savePostCover($imageFile, $absolutePath);
 
         return 'posts/'.$filename;
     }

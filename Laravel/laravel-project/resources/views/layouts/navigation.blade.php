@@ -17,10 +17,14 @@
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             <button type="button" class="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 focus:outline-none">
+                                @if (Auth::user()->image)
+                                    <img src="{{ Storage::url(Auth::user()->image) }}" alt="{{ Auth::user()->name }}" class="h-8 w-8 rounded-full object-cover ring-1 ring-gray-200" />
+                                @else
+                                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-800 text-xs font-bold text-white">
+                                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                    </span>
+                                @endif
                                 <span class="hidden sm:inline">{{ Auth::user()->name }}</span>
-                                <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-800 text-xs font-bold text-white sm:hidden">
-                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                                </span>
                                 <svg class="hidden h-4 w-4 fill-current sm:block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                 </svg>

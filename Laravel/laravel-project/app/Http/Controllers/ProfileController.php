@@ -10,13 +10,16 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
+use App\Services\ImageService;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
-use Intervention\Image\Drivers\Gd\Driver;
-use Intervention\Image\ImageManager;
 
 class ProfileController extends Controller
 {
+    public function __construct(
+        private ImageService $images
+    ) {}
+
     public function edit(Request $request): View
     {
         return view('profile.edit', [
@@ -27,14 +30,14 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
-        $user->fill($request->safe()->except('image'));
+        $user->fill($request->safe()->except(['image', 'remove_image']));
 
-        if ($request->hasFile('image')) {
-            if ($user->image) {
-                Storage::disk('public')->delete($user->image);
-            }
-
-            $user->image = $this->storeAvatar($request->file('image'), $user->username);
+        if ($request->boolean('remove_image')) {
+            $this->deleteAvatar($user);
+            $user->image = null;
+        } elseif ($request->hasFile('image')) {
+            $this->deleteAvatar($user);
+            $user->image = $this->storeAvatar($request->file('image'), $request->username);
         }
 
         if ($user->isDirty('email')) {
@@ -105,6 +108,13 @@ class ProfileController extends Controller
             ->pluck('posts.id');
     }
 
+    private function deleteAvatar(User $user): void
+    {
+        if ($user->image) {
+            Storage::disk('public')->delete($user->image);
+        }
+    }
+
     private function storeAvatar($imageFile, string $username): string
     {
         $filename = time().'_'.Str::slug($username).'.jpg';
@@ -114,10 +124,9 @@ class ProfileController extends Controller
             mkdir($destinationPath, 0755, true);
         }
 
-        $manager = new ImageManager(new Driver());
-        $image = $manager->read($imageFile);
-        $image->cover(200, 200);
-        $image->toJpeg(85)->save($destinationPath.'/'.$filename);
+        $absolutePath = $destinationPath.'/'.$filename;
+
+        $this->images->saveAvatar($imageFile, $absolutePath);
 
         return 'avatars/'.$filename;
     }

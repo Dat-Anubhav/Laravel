@@ -3,25 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class LikeController extends Controller
 {
-    /**
-     * Toggle liking status for a post using traditional redirect back.
-     */
-    public function toggle(Post $post)
+    public function toggle(Request $request, Post $post): JsonResponse|RedirectResponse
     {
-        // 1. Redirect guests straight to login
-        if (!auth()->check()) {
-            return redirect()->route('login');
+        if (! auth()->check()) {
+            return $request->expectsJson()
+                ? response()->json(['message' => 'Unauthenticated.'], 401)
+                : redirect()->route('login');
         }
 
-        $user = auth()->user();
+        $result = auth()->user()->likedPosts()->toggle($post->id);
+        $liked = in_array($post->id, $result['attached'], true);
 
-        // 2. Perform the traditional toggle action inside the pivot mapping
-        $user->likedPosts()->toggle($post->id);
+        $payload = [
+            'liked' => $liked,
+            'likes_count' => $post->likes()->count(),
+        ];
 
-        // 3. Return page redirect back to the user view state
-        return back();
+        return $request->expectsJson()
+            ? response()->json($payload)
+            : back();
     }
 }
