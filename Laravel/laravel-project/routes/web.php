@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 
-Route::get('/post/{post:slug}', [PostController::class, 'show'])
-    ->name('post.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [PostController::class, 'index'])
@@ -40,6 +38,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/posts/{post}/comments', [CommentController::class, 'store'])
         ->name('comments.store');
 });
+
+Route::get('/post/{post:slug}', [PostController::class, 'show'])
+    ->name('post.show');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -173,4 +173,5 @@ class PostController extends Controller
 
         return $slug;
     }
+    
 }
