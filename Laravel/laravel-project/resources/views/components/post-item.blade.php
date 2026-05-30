@@ -10,12 +10,21 @@
                 </h5>
             </a>
 
-            <p class="text-xs text-gray-500">
-                By
-                <a href="{{ route('profile.public', $po->user->username) }}" class="font-semibold text-gray-700 hover:text-blue-600 hover:underline transition-colors">
-                    {{ $po->user->name }}
-                </a>
-            </p>
+            <div class="flex items-center gap-2 text-xs text-gray-500">
+                @if ($po->user->image)
+                    <img src="{{ Storage::url($po->user->image) }}" alt="{{ $po->user->name }}" class="h-6 w-6 rounded-full object-cover" />
+                @else
+                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+                        {{ strtoupper(substr($po->user->name, 0, 1)) }}
+                    </span>
+                @endif
+                <span>
+                    By
+                    <a href="{{ route('profile.public', $po->user->username) }}" class="font-semibold text-gray-700 hover:text-blue-600 hover:underline transition-colors">
+                        {{ $po->user->name }}
+                    </a>
+                </span>
+            </div>
 
             <p class="text-gray-600 leading-relaxed text-sm line-clamp-3">
                 {{ $po->excerpt }}
@@ -44,10 +53,13 @@
                     </div>
 
                     @auth
-                        <form action="{{ route('posts.like', $po->id) }}" method="POST" class="inline-flex items-center">
+                        <form action="{{ route('posts.like', $po->id) }}" method="POST"
+                              class="inline-flex items-center"
+                              data-like-form
+                              data-liked="{{ $likedPostIds->contains($po->id) ? 'true' : 'false' }}">
                             @csrf
                             <button type="submit" class="flex items-center gap-1 text-gray-500 hover:text-red-500 transition-colors group focus:outline-none">
-                                <span>
+                                <span data-like-icon>
                                     @if ($likedPostIds->contains($po->id))
                                         <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                             <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
@@ -58,7 +70,7 @@
                                         </svg>
                                     @endif
                                 </span>
-                                <span class="text-xs font-medium text-gray-600 group-hover:text-red-500">
+                                <span data-like-count class="text-xs font-medium text-gray-600 group-hover:text-red-500">
                                     {{ $po->likes_count }}
                                 </span>
                             </button>

@@ -46,7 +46,7 @@
                     </p>
 
                     <div class="flex gap-4 text-xs md:text-sm font-medium text-gray-700 border-y border-gray-100 py-3 mb-4">
-                        <div><span class="text-gray-900 font-bold">{{ $user->followers_count }}</span> Followers</div>
+                        <div><span data-followers-count class="text-gray-900 font-bold">{{ $user->followers_count }}</span> Followers</div>
                         <div><span class="text-gray-900 font-bold">{{ $user->followings_count }}</span> Following</div>
                     </div>
 
@@ -62,9 +62,13 @@
                             Edit Profile
                         </a>
                     @elseif (auth()->check())
-                        <form action="{{ route('users.follow', $user->id) }}" method="POST" class="mt-3">
+                        <form action="{{ route('users.follow', $user->id) }}" method="POST"
+                              class="mt-3"
+                              data-follow-form
+                              data-following="{{ $isFollowing ? 'true' : 'false' }}">
                             @csrf
                             <button type="submit"
+                                    data-follow-button
                                     class="w-full text-xs md:text-sm font-semibold py-2 px-4 rounded-full transition-colors shadow-sm {{ $isFollowing ? 'bg-gray-100 border border-gray-200 hover:bg-gray-200 text-gray-700' : 'bg-gray-900 hover:bg-gray-800 text-white' }}">
                                 {{ $isFollowing ? 'Unfollow' : 'Follow' }}
                             </button>

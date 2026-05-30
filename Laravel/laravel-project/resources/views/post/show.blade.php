@@ -8,7 +8,10 @@
                 </h1>
 
                 <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3 text-sm text-gray-500">
-                    <span>
+                    <span class="inline-flex items-center gap-2">
+                        @if ($post->user->image)
+                            <img src="{{ Storage::url($post->user->image) }}" alt="{{ $post->user->name }}" class="h-7 w-7 rounded-full object-cover" />
+                        @endif
                         By
                         <a href="{{ route('profile.public', $post->user->username) }}" class="font-semibold text-gray-800 hover:text-blue-600 hover:underline">
                             {{ $post->user->name }}
@@ -22,19 +25,24 @@
                     <span>{{ $post->created_at->format('M d, Y') }}</span>
 
                     @auth
-                        <form action="{{ route('posts.like', $post->id) }}" method="POST" class="ml-auto sm:ml-0">
+                        <form action="{{ route('posts.like', $post->id) }}" method="POST"
+                              class="ml-auto sm:ml-0"
+                              data-like-form
+                              data-liked="{{ $likedPostIds->contains($post->id) ? 'true' : 'false' }}">
                             @csrf
                             <button type="submit" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 hover:border-red-200 hover:bg-red-50 transition-colors">
-                                @if ($likedPostIds->contains($post->id))
-                                    <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
-                                    </svg>
-                                @else
-                                    <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                    </svg>
-                                @endif
-                                <span class="font-medium text-gray-700">{{ $post->likes_count }}</span>
+                                <span data-like-icon>
+                                    @if ($likedPostIds->contains($post->id))
+                                        <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    @else
+                                        <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                        </svg>
+                                    @endif
+                                </span>
+                                <span data-like-count class="font-medium text-gray-700">{{ $post->likes_count }}</span>
                             </button>
                         </form>
                     @endauth

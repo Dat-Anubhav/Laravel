@@ -5,7 +5,7 @@
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
-            {{ __("Update your account's profile information and email address.") }}
+            {{ __("Update your account's profile information, photo, and email address.") }}
         </p>
     </header>
 
@@ -16,6 +16,51 @@
     <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="mt-6 space-y-6">
         @csrf
         @method('patch')
+
+        {{-- Profile photo --}}
+        <div
+            x-data="{
+                preview: null,
+                existing: @js($user->image ? Storage::url($user->image) : null),
+                showExisting() { return !this.preview && this.existing; },
+                showInitial() { return !this.preview && !this.existing; },
+            }"
+            class="rounded-xl border border-gray-200 bg-gray-50 p-5"
+        >
+            <x-input-label for="image" :value="__('Profile photo')" />
+
+            <div class="mt-4 flex flex-col sm:flex-row sm:items-center gap-5">
+                <div class="shrink-0">
+                    <img x-show="preview" :src="preview" alt="Preview" class="h-24 w-24 rounded-full object-cover ring-2 ring-white shadow-md" />
+                    <img x-show="showExisting()" :src="existing" alt="{{ $user->name }}" class="h-24 w-24 rounded-full object-cover ring-2 ring-white shadow-md" />
+                    <div x-show="showInitial()" class="flex h-24 w-24 items-center justify-center rounded-full bg-blue-600 text-3xl font-bold text-white shadow-md ring-2 ring-white">
+                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                    </div>
+                </div>
+
+                <div class="flex-1 space-y-3">
+                    <input
+                        id="image"
+                        name="image"
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                        class="block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-800 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-gray-700"
+                        @change="preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null"
+                    />
+                    <p class="text-xs text-gray-500">JPG, PNG, GIF or WebP. Max 2 MB. Saved as a 200×200 avatar.</p>
+
+                    @if ($user->image)
+                        <label class="inline-flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                            <input type="checkbox" name="remove_image" value="1" class="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                                   @change="if ($event.target.checked) { preview = null; existing = null; }">
+                            Remove current photo
+                        </label>
+                    @endif
+
+                    <x-input-error class="mt-1" :messages="$errors->get('image')" />
+                </div>
+            </div>
+        </div>
 
         <div>
             <x-input-label for="name" :value="__('Name')" />
@@ -50,23 +95,14 @@
         <div>
             <x-input-label for="username" :value="__('Username')" />
             <x-text-input id="username" name="username" type="text" class="mt-1 block w-full" :value="old('username', $user->username)" required autocomplete="username" />
+            <p class="mt-1 text-xs text-gray-500">Public profile: {{ url('/@') }}{{ old('username', $user->username) }}</p>
             <x-input-error class="mt-2" :messages="$errors->get('username')" />
         </div>
 
         <div>
             <x-input-label for="bio" :value="__('Bio')" />
-            <textarea id="bio" name="bio" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="4">{{ old('bio', $user->bio) }}</textarea>
+            <textarea id="bio" name="bio" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="4" placeholder="Tell readers a little about yourself...">{{ old('bio', $user->bio) }}</textarea>
             <x-input-error class="mt-2" :messages="$errors->get('bio')" />
-        </div>
-
-        <div>
-            <x-input-label for="image" :value="__('Profile photo')" />
-            @if ($user->image)
-                <img src="{{ Storage::url($user->image) }}" alt="{{ $user->name }}" class="mt-2 w-16 h-16 rounded-full object-cover" />
-            @endif
-            <input id="image" name="image" type="file" accept="image/*"
-                   class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200" />
-            <x-input-error class="mt-2" :messages="$errors->get('image')" />
         </div>
 
         <div class="flex items-center gap-4">
@@ -78,7 +114,7 @@
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600"
+                    class="text-sm text-green-600 font-medium"
                 >{{ __('Saved.') }}</p>
             @endif
         </div>
