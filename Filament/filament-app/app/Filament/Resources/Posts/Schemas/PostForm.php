@@ -14,7 +14,7 @@ use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Wizard;
+use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Schema;
 
 class PostForm
