@@ -24,8 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser // I
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        // This grants explicit administrative access to your 'Naruto' account
-        return $this->name === 'Naruto';
+       return $this->is_admin === true;
     }
 
     /**
@@ -38,6 +37,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser // I
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean'
         ];
     }
 
