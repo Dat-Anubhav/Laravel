@@ -18,6 +18,8 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Support\Facades\FilamentView; // to change the font size of the Admin login 
+use Illuminate\Support\Facades\Blade;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -27,6 +29,22 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->brandName('Admin')
+            ->renderHook(
+    'panels::styles.after',
+    fn (): string => Blade::render('
+        <style>
+            /* Targets the main layout brand container text natively */
+            .fi-simple-layout-header > h1, 
+            .fi-logo,
+            [class*="fi-simple-layout-header-title"] {
+                font-size: 2.5rem !important; /* Forces a massive font size increase */
+                font-weight: 700 !important;   /* Sets maximum extra-bold weight */
+                line-height: 1.2 !important;
+            }
+        </style>
+            '),
+)
             ->login()
             ->colors([
                 'primary' => Color::Amber,
