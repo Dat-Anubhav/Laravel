@@ -28,7 +28,7 @@ class PostForm
                     // STEP 1: Core Content Creation
                     Wizard\Step::make('Order Content')
                         ->description('Write the core post data')
-                        ->icon('heroicon-o-document-text')
+                        
                         ->schema([
                             TextInput::make('title')
                                 ->required()

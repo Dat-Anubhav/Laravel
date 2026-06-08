@@ -24,9 +24,12 @@ class PostForm
                 Textarea::make('content')
                     ->required()
                     ->columnSpanFull(),
-                TextInput::make('category_id')
+                Select::make('category_id')
+                    ->relationship('category', 'name')
+                    ->label('Category')
                     ->required()
-                    ->numeric(),
+                    ->searchable()
+                    ->preload(),
                 Select::make('user_id')
                     ->relationship('user', 'name')
                     ->required(),
