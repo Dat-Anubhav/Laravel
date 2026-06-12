@@ -49,7 +49,8 @@ class PostForm
                         ->schema([
                             FileUpload::make('image')
                                 ->disk('public')
-                                ->directory('posts'),
+                                ->directory('posts')
+                                ->nullable(),
                         ]),
 
                     // STEP 3: Metadata & Publishing Settings
@@ -65,7 +66,10 @@ class PostForm
                             ColorPicker::make('color')
                                 ->label('Theme Color'),
 
-                            TagsInput::make('tags')
+                            Select::make('tags')
+                                ->relationship("tags", "name")
+                                ->multiple()
+                                ->preload()
                                 ->placeholder('Add new tag...'),
 
                             Checkbox::make('published')
