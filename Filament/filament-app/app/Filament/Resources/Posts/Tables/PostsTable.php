@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Posts\Tables;
 
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
@@ -52,7 +53,9 @@ class PostsTable
                     ->preload(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->url(fn (\App\Models\post $record): string => route('filament.admin.resources.posts.edit', $record)),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
