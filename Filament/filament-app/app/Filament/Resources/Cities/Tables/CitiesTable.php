@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Cities\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class CitiesTable
@@ -13,7 +14,9 @@ class CitiesTable
     {
         return $table
             ->columns([
-                //
+                TextColumn::make("name"),
+                TextColumn::make("state.name"),
+                TextColumn::make("state.country.name"),
             ])
             ->filters([
                 //
