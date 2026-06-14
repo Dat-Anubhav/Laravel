@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Countries\Schemas;
 
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class CountryForm
@@ -10,7 +11,7 @@ class CountryForm
     {
         return $schema
             ->components([
-                //
+                TextInput::make("name")
             ]);
     }
 }
