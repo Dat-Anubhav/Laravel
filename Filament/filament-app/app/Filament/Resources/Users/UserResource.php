@@ -22,6 +22,9 @@ class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    //Adding post into navigation sidebar
+    protected static string|\UnitEnum|null $navigationGroup = "Masters";
+
     public static function form(Schema $schema): Schema
     {
         return UserForm::configure($schema);
