@@ -18,9 +18,30 @@ class CountryResource extends Resource
 {
     protected static ?string $model = Country::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    // Setting Manage countries icon to flag
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Flag;
 
+    
     protected static ?string $recordTitleAttribute = 'name';
+
+    // Adding countries into the Location navigation sidebar
+    protected static string|\UnitEnum|null $navigationGroup = 'Locations';
+
+    // Assigning a number to country in a navigation sidebar to display them in a order
+    protected static ?int $navigationSort = 3;
+
+    // Assiging a label
+    protected static ?string $navigationLabel = 'Manage Countries';
+
+    //CREATING A COUNT BADGE
+    public static function getNavigationBadge():?string{
+        return Country::count();
+    }
+
+    //Changing color of the above created badge
+    public static function getNavigationBadgeColor():string|array|null{
+        return "success";
+    }
 
     public static function form(Schema $schema): Schema
     {

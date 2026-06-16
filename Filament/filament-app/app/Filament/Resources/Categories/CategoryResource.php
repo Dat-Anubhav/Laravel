@@ -23,6 +23,12 @@ class CategoryResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    // Adding categories to the navigation sidebar
+    protected static string|\UnitEnum|null $navigationGroup = 'Masters';
+
+    // Adding third level navigation bar inside a parent module
+    protected static ?string $navigationParentItem = 'Posts';
+
     public static function form(Schema $schema): Schema
     {
         return CategoryForm::configure($schema);
@@ -36,7 +42,7 @@ class CategoryResource extends Resource
     public static function getRelations(): array
     {
         return [
-            PostsRelationManager::class
+            PostsRelationManager::class,
         ];
     }
 

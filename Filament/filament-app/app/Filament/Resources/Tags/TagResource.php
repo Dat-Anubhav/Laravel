@@ -22,6 +22,13 @@ class TagResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    //Adding tags into navigation sidebar
+    protected static string|\UnitEnum|null $navigationGroup = "Masters";
+
+    //Adding third level navigation bar inside a parent module
+
+    protected static ?string $navigationParentItem = "Posts";
+
     public static function form(Schema $schema): Schema
     {
         return TagForm::configure($schema);

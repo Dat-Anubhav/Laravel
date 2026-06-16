@@ -18,9 +18,29 @@ class StateResource extends Resource
 {
     protected static ?string $model = State::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Map;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    // Adding states into the Location navigation sidebar
+    protected static string|\UnitEnum|null $navigationGroup = 'Locations';
+
+    // Assigning a number to state in navigation sidebar to display it in order
+
+    protected static ?int $navigationSort = 2;
+
+    //Assigning a label
+    protected static ?string $navigationLabel = "Manage States";
+
+     //CREATING A COUNT BADGE
+    public static function getNavigationBadge():?string{
+        return State::count();
+    }
+
+    //Changing color of the above created badge
+    public static function getNavigationBadgeColor():string|array|null{
+        return "success";
+    }
 
     public static function form(Schema $schema): Schema
     {
