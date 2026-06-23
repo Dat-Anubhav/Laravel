@@ -14,7 +14,7 @@ return new class extends Migration
             $table->date("published_at")->nullable()->change();
         });
 
-        Schema::table('post_tag', function (Blueprint $table) {
+        Schema::table('tags', function (Blueprint $table) {
             $table->string("name")->nullable()->change();
         });
     }
@@ -30,7 +30,7 @@ return new class extends Migration
             $table->date("published_at")->nullable(false)->change();
         });
 
-        Schema::table('post_tag', function (Blueprint $table) {
+        Schema::table('tags', function (Blueprint $table) {
             $table->string("name")->nullable(false)->change();
         });
     }
