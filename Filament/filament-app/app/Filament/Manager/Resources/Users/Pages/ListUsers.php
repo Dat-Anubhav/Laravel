@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\Users\Pages;
+namespace App\Filament\Manager\Resources\Users\Pages;
 
-use App\Filament\Resources\Users\UserResource;
-use App\Filament\Resources\Users\Widgets\UserCounterWidget;
+use App\Filament\Manager\Resources\Users\UserResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
@@ -15,12 +14,6 @@ class ListUsers extends ListRecords
     {
         return [
             CreateAction::make(),
-        ];
-    }
-
-    protected function getHeaderWidgets(): array{
-        return[
-            UserCounterWidget::class,
         ];
     }
 }
