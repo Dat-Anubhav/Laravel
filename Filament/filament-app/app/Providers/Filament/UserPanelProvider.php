@@ -19,6 +19,11 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
+use App\Filament\Pages\Tenancy\RegisterTeam;
+
+
+use App\Models\Team;
+
 class UserPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -27,6 +32,9 @@ class UserPanelProvider extends PanelProvider
             ->id('user')
             ->path('user')
             ->login()
+            ->tenant(Team::class)// Enabled multi tenancy
+            ->tenantRegistration(RegisterTeam::class) // Register registration page
+            ->brandname("User panel")
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -50,6 +58,7 @@ class UserPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+
             ])
             ->authMiddleware([
                 Authenticate::class,
