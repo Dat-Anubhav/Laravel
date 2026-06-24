@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\Team;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 class post extends Model
 {
     protected $fillable=["title","slug","category_id","color","image",
@@ -23,5 +26,10 @@ class post extends Model
     public function tags(){
         return $this->belongsToMany(Tag::class, "post_tag");
     } 
+
+    public function team(): BelongsTo
+{
+    return $this->belongsTo(Team::class);
+}
 }
 

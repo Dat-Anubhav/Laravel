@@ -27,6 +27,7 @@ class ManagerPanelProvider extends PanelProvider
             ->id('manager')
             ->path('manager')
             ->login()
+            ->brandname("Manager panel")
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -50,6 +51,7 @@ class ManagerPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                'role:manager'
             ])
             ->authMiddleware([
                 Authenticate::class,
