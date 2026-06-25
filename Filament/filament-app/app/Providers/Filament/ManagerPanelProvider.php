@@ -18,6 +18,8 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Models\Team;
+
 
 class ManagerPanelProvider extends PanelProvider
 {
@@ -27,6 +29,7 @@ class ManagerPanelProvider extends PanelProvider
             ->id('manager')
             ->path('manager')
             ->login()
+            ->tenant(Team::class)
             ->brandname("Manager panel")
             ->colors([
                 'primary' => Color::Amber,

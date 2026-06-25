@@ -11,22 +11,38 @@ use Filament\Tables\Table;
 class UsersTable
 {
     public static function configure(Table $table): Table
-    {
-        return $table
-            ->columns([
-                TextColumn::make("name"),
-                TextColumn::make("email")
-            ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
+{
+    return $table
+        ->columns([
+            TextColumn::make("name")
+                ->searchable(),
+            TextColumn::make("email")
+                ->searchable(),
+            TextColumn::make("type")
+                ->badge()
+                ->color(fn (string $state): string => match ($state) {
+                    'admin' => 'danger',
+                    'manager' => 'warning',
+                    'user' => 'success',
+                    default => 'gray',
+                })
+                ->searchable(),
+            TextColumn::make("teams.name")
+                ->badge()
+                ->color('info')
+                ->label('Companies/Teams'),
+        ])
+        ->filters([
+            //
+        ])
+        ->recordActions([
+            EditAction::make(),
+        ])
+        ->toolbarActions([
+            BulkActionGroup::make([
+                DeleteBulkAction::make(),
+            ]),
+        ]);
+}
+
 }
