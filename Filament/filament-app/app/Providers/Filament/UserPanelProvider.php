@@ -33,7 +33,7 @@ class UserPanelProvider extends PanelProvider
             ->path('user')
             ->login()
             ->tenant(Team::class)// Enabled multi tenancy
-            ->tenantRegistration(RegisterTeam::class) // Register registration page
+            //->tenantRegistration(RegisterTeam::class) // Register registration page
             ->brandname("User panel")
             ->colors([
                 'primary' => Color::Amber,

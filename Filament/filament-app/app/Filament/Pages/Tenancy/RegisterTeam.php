@@ -4,7 +4,7 @@ namespace App\Filament\Pages\Tenancy;
 
 use App\Models\Team;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Schema; // <-- Note the Filament v5 Schema import
+use Filament\Schemas\Schema; // Note the Filament v5 Schema import
 use Filament\Pages\Tenancy\RegisterTenant;
 use Illuminate\Support\Str;
 
