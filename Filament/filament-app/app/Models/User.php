@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthentication;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,16 +22,23 @@ use Illuminate\Support\Collection;
 
 #[Fillable(['name', 'email', 'password', 'country_id', 'state_id', 'city_id', 'type'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements FilamentUser, HasTenants
+class User extends Authenticatable implements FilamentUser, HasTenants, HasAppAuthentication
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+    use InteractsWithAppAuthentication;
 
     /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
      */
+
+    protected $hidden = [
+    'password',
+    'remember_token',
+    'app_authentication_secret',
+    ];
     protected function casts(): array
     {
         return [
