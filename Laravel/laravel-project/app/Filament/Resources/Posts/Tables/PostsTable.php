@@ -24,7 +24,7 @@ class PostsTable
                     ->searchable(),
                 TextColumn::make('slug')
                     ->searchable(),
-                TextColumn::make('category.name')
+                 TextColumn::make('category.name')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('user.name')

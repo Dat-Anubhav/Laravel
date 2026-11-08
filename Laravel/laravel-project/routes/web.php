@@ -6,6 +6,7 @@ use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Models\Post;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -52,3 +53,10 @@ Route::get('/@{username}', [ProfileController::class, 'show'])
     ->name('profile.public');
 
 require __DIR__.'/auth.php';
+
+
+Route::get('test-query', function(){
+    return Post::query()
+    ->where('title','coffee')
+    ->toRawSql();  
+});
